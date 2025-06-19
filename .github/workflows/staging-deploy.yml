@@ -1,0 +1,129 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches:
+      - staging
+
+env:
+  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+  VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+  TF_WORKSPACE: staging
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Fetch Secrets from Vault
+        id: secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            secret/data/staging/terraform access_key | AWS_ACCESS_KEY_ID ;
+            secret/data/staging/terraform secret_key | AWS_SECRET_ACCESS_KEY
+
+      - name: Terraform Init
+        run: |
+          cd terraform/environments/stag
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd terraform/environments/stag
+          terraform plan -out=tfplan
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: terraform/environments/stag/tfplan
+
+  terraform-apply:
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Fetch Secrets from Vault
+        id: secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            secret/data/staging/terraform access_key | AWS_ACCESS_KEY_ID ;
+            secret/data/staging/terraform secret_key | AWS_SECRET_ACCESS_KEY
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+          path: terraform/environments/stag
+
+      - name: Terraform Init
+        run: |
+          cd terraform/environments/stag
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd terraform/environments/stag
+          terraform apply -auto-approve tfplan
+
+      - name: Generate Ansible Inventory
+        run: |
+          cd terraform/environments/stag
+          terraform output -raw ansible_inventory > ../../../ansible/inventory/01_vm_provisioning_output.ini
+
+  ansible-deploy:
+    needs: terraform-apply
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Fetch Secrets from Vault
+        id: secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            secret/data/staging/ansible ssh_key | SSH_PRIVATE_KEY
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ steps.secrets.outputs.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Run Ansible Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventory/01_vm_provisioning_output.ini playbooks/site.yml
+
