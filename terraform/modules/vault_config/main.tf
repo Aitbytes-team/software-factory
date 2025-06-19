@@ -19,7 +19,7 @@ resource "vault_auth_backend" "github" {
 }
 
 # Configure GitHub auth method
-resource "vault_github_auth_backend_config" "config" {
+resource "vault_github_auth_backend" "config" {
   organization = var.github_org
   token_type   = "installation"
 }
