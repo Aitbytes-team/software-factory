@@ -112,7 +112,7 @@ jobs:
             kv/data/test placeholder | TEST_SECRET ;
 
       - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
           path: terraform/environments/prod
