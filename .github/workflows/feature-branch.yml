@@ -59,14 +59,23 @@ jobs:
 
       - name: Diagnose Vault Connection
         run: |
-          # Test basic connectivity
-          curl -s -o /dev/null -w "Vault HTTP Status: %{http_code}\n" ${{ secrets.VAULT_ADDR }}
+          echo "Testing basic connectivity..."
+          curl -sL -D - -o /dev/null ${{ secrets.VAULT_ADDR }}
           
-          # Test the KV endpoint (with proper headers)
-          curl -s \
+          echo -e "\nTesting KV endpoint (without v1)..."
+          curl -sL -v \
             -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
-            -w "\nHTTP Status: %{http_code}\n" \
-            "${{ secrets.VAULT_ADDR }}/v1/kv/data/test"
+            "${{ secrets.VAULT_ADDR }}/kv/data/test" 2>&1
+            
+          echo -e "\nTesting KV endpoint (with v1)..."
+          curl -sL -v \
+            -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
+            "${{ secrets.VAULT_ADDR }}/v1/kv/data/test" 2>&1
+            
+          echo -e "\nTesting KV endpoint (alternative path)..."
+          curl -sL -v \
+            -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
+            "${{ secrets.VAULT_ADDR }}/v1/secret/data/test" 2>&1
 
       - name: Fetch Secrets from Vault
         id: secrets
