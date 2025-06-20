@@ -72,7 +72,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            v1/kv/data/test placeholder | TEST_SECRET ;
+            kv/data/test placeholder | TEST_SECRET ;
 
       - name: Terraform Init
         run: |
@@ -109,7 +109,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            v1/kv/data/test placeholder | TEST_SECRET ;
+            kv/data/test placeholder | TEST_SECRET ;
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v3
@@ -156,7 +156,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            v1/kv/data/test placeholder | TEST_SECRET ;
+            kv/data/test placeholder | TEST_SECRET ;
 
       - name: Setup SSH Key
         run: |
