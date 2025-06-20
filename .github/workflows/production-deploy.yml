@@ -72,8 +72,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            secret/data/production/terraform access_key | AWS_ACCESS_KEY_ID ;
-            secret/data/production/terraform secret_key | AWS_SECRET_ACCESS_KEY
+            /v1/kv/metadata/test placeholder | TEST_SECRET ;
 
       - name: Terraform Init
         run: |
@@ -110,8 +109,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            secret/data/production/terraform access_key | AWS_ACCESS_KEY_ID ;
-            secret/data/production/terraform secret_key | AWS_SECRET_ACCESS_KEY
+            /v1/kv/metadata/test placeholder | TEST_SECRET ;
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v3
@@ -158,7 +156,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            secret/data/production/ansible ssh_key | SSH_PRIVATE_KEY
+            /v1/kv/metadata/test placeholder | TEST_SECRET ;
 
       - name: Setup SSH Key
         run: |
