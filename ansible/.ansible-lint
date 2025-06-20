@@ -1,0 +1,31 @@
+# .ansible-lint configuration file
+# See: https://ansible-lint.readthedocs.io/configuring/
+
+# Exclude paths from linting
+exclude_paths:
+  - .cache/
+  - .git/
+  - .github/
+
+# Define which rules to skip
+skip_list:
+  - fqcn[action]  # Don't require Fully Qualified Collection Names
+  - yaml[line-length]  # Don't enforce line length
+  - yaml[trailing-spaces]  # Don't enforce no trailing spaces
+  - yaml[brackets]  # Don't enforce brackets styling
+  - yaml[truthy]  # Don't enforce true/false format
+  - yaml[colons]  # Don't enforce colon spacing
+  - yaml[commas]  # Don't enforce comma styling
+  - yaml[empty-lines]  # Don't enforce empty lines rules
+  - yaml[document-start]  # Don't require --- document start marker
+  - yaml[key-duplicates]  # Still good to keep this as warning
+
+# Paths to be analyzed
+warn_list:
+  - experimental  # Warn about experimental features
+  - yaml  # General YAML formatting as warnings only
+  - fqcn  # Make FQCN a warning instead of error
+
+# Make the linter less strict
+strict: false
+
