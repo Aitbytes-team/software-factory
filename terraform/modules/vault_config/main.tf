@@ -8,10 +8,10 @@ terraform {
 }
 
 # Configure the Vault provider
-provider "vault" {
-  # Token and address should be passed through environment variables
-  # VAULT_ADDR and VAULT_TOKEN
-}
+# provider "vault" {
+#   # Token and address should be passed through environment variables
+#   # VAULT_ADDR and VAULT_TOKEN
+# }
 
 # Enable GitHub auth method
 resource "vault_auth_backend" "github" {
