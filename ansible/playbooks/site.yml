@@ -1,6 +1,6 @@
 ---
 - name: Placeholder playbook for CI
-  hosts: all
+  hosts: localhost
   gather_facts: false
   tasks:
     - name: Print message
