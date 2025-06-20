@@ -57,6 +57,17 @@ jobs:
         with:
           terraform_version: "1.5.0"
 
+      - name: Diagnose Vault Connection
+        run: |
+          # Test basic connectivity
+          curl -s -o /dev/null -w "Vault HTTP Status: %{http_code}\n" ${{ secrets.VAULT_ADDR }}
+          
+          # Test the KV endpoint (with proper headers)
+          curl -s \
+            -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
+            -w "\nHTTP Status: %{http_code}\n" \
+            "${{ secrets.VAULT_ADDR }}/v1/kv/data/test"
+
       - name: Fetch Secrets from Vault
         id: secrets
         uses: hashicorp/vault-action@v2
