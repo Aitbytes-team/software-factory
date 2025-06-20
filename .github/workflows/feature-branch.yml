@@ -57,34 +57,21 @@ jobs:
         with:
           terraform_version: "1.5.0"
 
-      # - name: Diagnose Vault Connection
-      #   run: |
-      #     echo "Testing basic connectivity..."
-      #     curl -sL -D - -o /dev/null ${{ secrets.VAULT_ADDR }}
-      #     
-      #     echo -e "\nTesting KV endpoint (without v1)..."
-      #     curl -sL -v \
-      #       -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
-      #       "${{ secrets.VAULT_ADDR }}/kv/data/test" 2>&1
-      #       
-      #     echo -e "\nTesting KV endpoint (with v1)..."
-      #     curl -sL -v \
-      #       -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
-      #       "${{ secrets.VAULT_ADDR }}/v1/kv/data/test" 2>&1
-      #       
-      #     echo -e "\nTesting KV endpoint (alternative path)..."
-      #     curl -sL -v \
-      #       -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
-      #       "${{ secrets.VAULT_ADDR }}/v1/secret/data/test" 2>&1
+      - name: Diagnose Vault Connection (Verbose)
+        run: |
+          echo "--- Running Verbose cURL a to Vault API ---"
+          curl -v -L \
+            -H "X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
+            "${{ secrets.VAULT_ADDR }}/v1/kv/data/test"
 
       - name: Fetch Secrets from Vault
         id: secrets
         uses: hashicorp/vault-action@v2
         with:
-          url: ${{ secrets.VAULT_ADDR }}/v1
+          url: ${{ secrets.VAULT_ADDR }}
           token: ${{ secrets.VAULT_TOKEN }}
           secrets: |
-            secret/data/test placeholder | TEST_SECRET ;
+            kv/data/test placeholder | TEST_SECRET ;
 
       - name: Terraform Init
         run: |
